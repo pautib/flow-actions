@@ -1,4 +1,4 @@
-# Workflow System
+# WorkActions - A Workflow System
 
 Middleware Node.js + Express application to trigger workflows by executing actions on third-party services.
 
