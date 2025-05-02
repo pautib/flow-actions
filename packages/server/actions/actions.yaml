@@ -1,0 +1,34 @@
+actions:
+  - name: "slack"
+    description: "Send a message to a Slack channel"
+    icon: "./icons/slack.png"
+    parameters:
+      - name: "message"
+        type: "string"
+        required: true
+        description: "Message to send with placeholders for variables"
+      - name: "slack_token_id"
+        type: "string"
+        required: true
+        description: "Slack token ID retrieved from the Slack API"
+      - name: "slack_channel"
+        type: "string"
+        required: true
+        description: "The slack channel id to send the message to"
+  
+  - name: "telegram"
+    description: "Send a message to a Telegram channel"
+    icon: "./icons/telegram.png"
+    parameters:
+      - name: "message"
+        type: "string"
+        required: true
+        description: "Message to send with placeholders for variables"
+      - name: "telegram_token_id"
+        type: "string"
+        required: true
+        description: "Telegram token ID retrieved from a Telegram bot"
+      - name: "telegram_channel"
+        type: "string"
+        required: true
+        description: "The telegram channel id to send the message to"

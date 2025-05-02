@@ -1,14 +1,20 @@
 {
-  "name": "workflow-system",
-  "version": "1.0.0",
-  "main": "index.js",
-  "scripts": {
-    "start": "node index.js"
-  },
-  "dependencies": {
-    "@slack/web-api": "^7.9.1",
-    "dotenv": "^16.5.0",
-    "express": "^4.18.2",
-    "js-yaml": "^4.1.0"
-  }
+    "name": "workflow-system",
+    "private": true,
+    "workspaces": [
+        "packages/*"
+    ],
+    "scripts": {
+        "dev": "concurrently -k -n SERVER,WEB \"pnpm --filter server dev\" \"pnpm --filter web dev\"",
+        "build": "pnpm --filter server build && pnpm --filter web build",
+        "lint": "eslint . --ext .ts,.tsx"
+    },
+    "devDependencies": {
+        "concurrently": "^8.0.1",
+        "eslint": "^9.0.0"
+    },
+    "engines": {
+        "node": ">=20"
+    },
+    "packageManager": "pnpm@10.8.1+sha512.c50088ba998c67b8ca8c99df8a5e02fd2ae2e2b29aaf238feaa9e124248d3f48f9fb6db2424949ff901cffbb5e0f0cc1ad6aedb602cd29450751d11c35023677"
 }
