@@ -8,7 +8,7 @@ module.exports = async function sendTelegram(flow, user) {
     const telegramObj = getActionObject(flow, "telegram");
 
     if (telegramObj.message) {
-        telegramObj.message = telegramObj.message.replace(/\${(\w+)}/g, (match, key) => {
+        telegramObj.message = telegramObj.message.replace(/\{\{(\w+)\}\}/g, (match, key) => {
             return user[key] || match;
         });
     }

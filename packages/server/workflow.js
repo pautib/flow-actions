@@ -63,8 +63,7 @@ function getWorkflow(workflowName) {
 function getActionObject(workflowName, actionName) {
   const actions = getWorkflow(workflowName).actions;
   const action = actions.find(action => Object.keys(action)[0] === actionName);
-  const actionContent = action[Object.keys(action)[0]]
-  return actionContent;
+  return action[Object.keys(action)[0]];
 }
 
 
