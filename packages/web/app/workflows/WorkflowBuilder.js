@@ -233,7 +233,7 @@ export default function WorkflowBuilder() {
                             value={actionParams[param.name] || ''}
                             onChange={(e) => handleParamChange(param.name, e.target.value)}
                             required={param.required}
-                            placeholder="Use ${variable} for dynamic values"
+                            placeholder="Use {{variable}} for dynamic values"
                           />
                         ) : (
                           <Input

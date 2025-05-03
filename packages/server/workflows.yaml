@@ -1,6 +1,6 @@
 register:
   actions:
     - slack:
-        message: New user registered with name ${name} and email ${email}
+        message: New user registered with name {{name}} and email {{email}}
         slack_token_id: xoxb-8804991333012-8831474053270-10GSqyS6KgMoUSRFCD9xVSVV
         slack_channel: C08PNV5RS7N

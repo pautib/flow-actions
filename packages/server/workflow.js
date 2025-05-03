@@ -2,8 +2,7 @@ const fs   = require("fs");
 const yaml = require("js-yaml");
 
 async function executeWorkflow(flow, user) {
-  const file = fs.readFileSync("workflows.yaml", "utf8");
-  const workflows = yaml.load(file);
+  const workflows = getWorkflows()
 
   const workflow = workflows[flow];
   if (!workflow || !workflow.actions) {
@@ -56,5 +55,23 @@ function getWorkflows() {
   return yaml.load(fs.readFileSync('./workflows.yaml', 'utf-8'));
 }
 
+function getWorkflow(workflowName) {
+  const workflows = getWorkflows();
+  return workflows[workflowName];
+}
 
-module.exports = { executeWorkflow, getWorkflows, appendWorkflow, getActionsConfig }; 
+function getActionObject(workflowName, actionName) {
+  const actions = getWorkflow(workflowName).actions;
+  const action = actions.find(action => Object.keys(action)[0] === actionName);
+  const actionContent = action[Object.keys(action)[0]]
+  return actionContent;
+}
+
+
+module.exports = { 
+  executeWorkflow, 
+  getWorkflows, 
+  appendWorkflow, 
+  getActionsConfig, 
+  getActionObject 
+}; 
