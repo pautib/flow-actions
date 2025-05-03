@@ -1,17 +1,27 @@
-require("dotenv").config();
 const { WebClient } = require("@slack/web-api");
+const { getActionObject } = require("../workflow");
 
+module.exports = async function sendSlack(workflowName, requestBody) {
+  console.log(`Sending Slack message for ${requestBody.toString()}`);
 
-module.exports = async function sendSlack(flow, user) {
-  console.log(`Sending Slack message for ${user.name}`);
+  const slackObj = getActionObject(workflowName, "slack");
+  
+  if (!slackObj) {
+    throw new Error(`Slack action does not exist inside flow ${workflowName}`)
+  }
+  
+  const webClient = new WebClient(slackObj.slack_token_id);
 
-  const webClient = new WebClient(process.env.SLACK_TOKEN);
+  if (slackObj.message) {
+    slackObj.message = slackObj.message.replace(/\{\{(\w+)\}\}/g, (match, key) => {
+      return requestBody[key] || match;
+    });
+  }
 
   try {
-
     const result = await webClient.chat.postMessage({
-      channel: process.env.SLACK_CHANNEL,
-      text: `New user registered: ${user.name} (${user.email})`
+      channel: slackObj.slack_channel,
+      text: slackObj.message
     });
 
     console.log("Slack message sent successfully: ", result);
@@ -20,6 +30,5 @@ module.exports = async function sendSlack(flow, user) {
     console.error("An error occurred while sending the Slack message:", error);
     return;
   }
-
 
 };

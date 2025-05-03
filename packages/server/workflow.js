@@ -32,7 +32,7 @@ async function executeWorkflow(flow, user) {
 
 
 function appendWorkflow(newWorkflowString) {
-   // We assume workflow is a yaml in string format
+   // We assume newWorkflowString is a yaml in string format
   let existingContent = "";
   if (fs.existsSync("workflows.yaml")) {
     existingContent = fs.readFileSync("workflows.yaml", "utf8");
