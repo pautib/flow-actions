@@ -1,5 +1,5 @@
 require("dotenv").config();
-const { getActionObject } = require("../../workflow");
+const { getActionObject } = require("../workflow");
 
 module.exports = async function sendTelegram(flow, user) {
 
@@ -14,8 +14,8 @@ module.exports = async function sendTelegram(flow, user) {
     }
 
     try {
-        const url = new URL(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`);
-        url.searchParams.set("chat_id", process.env.TELEGRAM_CHANNEL);
+        const url = new URL(`https://api.telegram.org/bot${telegramObj.telegram_token_id}/sendMessage`);
+        url.searchParams.set("chat_id", telegramObj.telegram_channel);
         url.searchParams.set("text", telegramObj.message);
 
         const result = await fetch(url, {

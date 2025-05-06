@@ -1,13 +1,20 @@
 const fs   = require("fs");
 const yaml = require("js-yaml");
 
-async function executeWorkflow(flow, user) {
-  const workflows = getWorkflows()
 
-  const workflow = workflows[flow];
+// Public methods
+async function executeWorkflow(req, res, next) {
+  
+  const { workflowName } = req.params;
+  const requestBody = req.body;
+  console.log(`Executing workflow: ${workflowName}`);
+  
+  const workflows = getWorkflowsYaml();
+
+  const workflow = workflows[workflowName];
   if (!workflow || !workflow.actions) {
-    console.log(`No workflow found for event: ${flow}`);
-    return;
+    console.log(`No workflow found for event: ${workflowName}`);
+    return res.status(400).json({ "message": `No workflow found for event: ${workflowName}` });
   }
 
   for (const actionItem of workflow.actions) {
@@ -22,16 +29,72 @@ async function executeWorkflow(flow, user) {
 
     try {
       const action = require(`./actions/${actionName}`);
-      await action(flow, user);
+      await action(workflowName, requestBody);
+      next();
     } catch (err) {
       console.error(`Error in action '${actionName}':`, err.message);
+      return res.status(400).json({ message: `Error executing action ${ actionName } in workflow ${ workflowName } `});
     }
 
   }
 }
 
+async function addWorkflow(req, res, next) {
 
-function appendWorkflow(newWorkflowString) {
+  try {
+    const workflow = yaml.load(req.body);
+    
+    for (const action of workflow[Object.keys(workflow)[0]].actions) { // Validate each action
+      
+      const actionConfig = getActionsYaml().actions.find(a => a.name === Object.keys(action)[0]);
+      
+      for (const param of actionConfig.parameters) { // Validate required parameters
+        if (param.required && !action[Object.keys(action)[0]][param.name]) {
+          return res.status(400).json({ 
+            error: `Missing required parameter: ${param.name} for action ${action.type}` 
+          });
+        }
+      }
+    }
+    
+    appendWorkflowToYaml(req.body); // Save workflow to file
+    next();
+  } catch (error) {
+    console.error('Error saving workflow:', error);
+    return res.status(500).json({ error: 'Failed to save workflow' });
+  }
+
+}
+
+function getActions(req, res, next) {
+  try {
+    const actionsConfig = getActionsYaml();
+    res.json(actionsConfig);
+  } catch (error) {
+    console.error('Error reading actions config:', error);
+    res.status(500).json({ error: 'Failed to load actions configuration' });
+  }
+}
+
+function getWorkflows(req, res) {
+  try {
+    const workflows = getWorkflowsYaml();
+    res.json(workflows);
+  } catch (error) {
+    console.error('Error reading current workflows: ', error);
+    res.status(500).json({error: 'Failed to load existing workflows'});
+  }
+}
+
+function getActionObject(workflowName, actionName) {
+  const actions = getWorkflow(workflowName).actions;
+  const action = actions.find(action => Object.keys(action)[0] === actionName);
+  return action[Object.keys(action)[0]];
+}
+
+// Private methods
+
+function appendWorkflowToYaml(newWorkflowString) {
    // We assume newWorkflowString is a yaml in string format
   let existingContent = "";
   if (fs.existsSync("workflows.yaml")) {
@@ -47,30 +110,25 @@ function appendWorkflow(newWorkflowString) {
   fs.writeFileSync("workflows.yaml", yaml.dump(workflows));
 }
 
-function getActionsConfig() {
+function getActionsYaml() {
   return yaml.load(fs.readFileSync('./actions/actions.yaml', 'utf8'));
 }
 
-function getWorkflows() {
+function getWorkflowsYaml() {
   return yaml.load(fs.readFileSync('./workflows.yaml', 'utf-8'));
 }
 
 function getWorkflow(workflowName) {
-  const workflows = getWorkflows();
+  const workflows = getWorkflowsYaml();
   return workflows[workflowName];
 }
 
-function getActionObject(workflowName, actionName) {
-  const actions = getWorkflow(workflowName).actions;
-  const action = actions.find(action => Object.keys(action)[0] === actionName);
-  return action[Object.keys(action)[0]];
-}
 
 
 module.exports = { 
   executeWorkflow, 
   getWorkflows, 
-  appendWorkflow, 
-  getActionsConfig, 
-  getActionObject 
+  addWorkflow,
+  getActions,
+  getActionObject
 }; 
