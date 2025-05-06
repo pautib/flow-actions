@@ -1,7 +1,12 @@
 register:
   actions:
-    - slack:
+    - telegram:
         message: User registered with name {{name}} and email {{email}}
-        slack_token_id: xoxb-8804991333012-8831474053270-etBulx23rSjBi4zDu1KwqI3Z
-        slack_channel: C08PNV5RS7N
-
+        telegram_token_id: 
+        telegram_channel: 
+notify:
+  actions:
+    - telegram:
+        message: User {{name}}
+        telegram_token_id: test
+        telegram_channel: test
