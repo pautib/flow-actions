@@ -4,15 +4,15 @@ actions:
     icon: "./icons/slack.png"
     parameters:
       - name: "message"
-        type: "string"
+        type: "textarea"
         required: true
         description: "Message to send with placeholders for variables"
       - name: "slack_token_id"
-        type: "string"
+        type: "input"
         required: true
         description: "Slack token ID retrieved from the Slack API"
       - name: "slack_channel"
-        type: "string"
+        type: "input"
         required: true
         description: "The slack channel id to send the message to"
   
@@ -21,14 +21,43 @@ actions:
     icon: "./icons/telegram.png"
     parameters:
       - name: "message"
-        type: "string"
+        type: "textarea"
         required: true
         description: "Message to send with placeholders for variables"
       - name: "telegram_token_id"
-        type: "string"
+        type: "input"
         required: true
         description: "Telegram token ID retrieved from a Telegram bot"
       - name: "telegram_channel"
-        type: "string"
+        type: "input"
         required: true
         description: "The telegram channel id to send the message to"
+
+  - name: "awsSes"
+    description: "Send an email through AWS Simple Email Service"
+    icon: "./icons/awsSes.png"
+    parameters:
+      - name: "accessKey"
+        type: "input"
+        required: true
+        description: "Identifies your API call signatures to AWS together with secretKey"
+      - name: "secretKey"
+        type: "input"
+        required: true
+        description: "Identifies your API call signatures to AWS together with accessKey"
+      - name: "verifiedSourceEmail"
+        type: "input"
+        required: true
+        description: "The source email, verified in AWS"
+      - name: "destinationEmails"
+        type: "array"
+        required: true
+        description: "Array of strings with the emails to send the information. Minimum one required"
+      - name: "emailSubject"
+        type: "input"
+        required: true
+        description: "Email subject or title"
+      - name: "emailHtmlTemplate"
+        type: "html"
+        required: true
+        description: "Email body html template, possibly with handlebars"

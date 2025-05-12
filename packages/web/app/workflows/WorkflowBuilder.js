@@ -15,8 +15,10 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Trash2 } from "lucide-react";
+import { ActionParamInput } from './ActionParamInput';
 
 export default function WorkflowBuilder() {
+
   const [actions, setActions] = useState([]);
   const [workflows, setWorkflows] = useState({});
   const [workflowName, setWorkflowName] = useState('');
@@ -225,25 +227,13 @@ export default function WorkflowBuilder() {
                       )}
                     </div>
                     {getActionConfig(selectedAction)?.parameters.map((param) => (
-                      <div key={param.name} className="space-y-2">
-                        <Label htmlFor={param.name}>{param.description}</Label>
-                        {param.name === 'message' ? (
-                          <Textarea
-                            id={param.name}
-                            value={actionParams[param.name] || ''}
-                            onChange={(e) => handleParamChange(param.name, e.target.value)}
-                            required={param.required}
-                            placeholder="Use {{variable}} for dynamic values"
-                          />
-                        ) : (
-                          <Input
-                            id={param.name}
-                            value={actionParams[param.name] || ''}
-                            onChange={(e) => handleParamChange(param.name, e.target.value)}
-                            required={param.required}
-                            type={param.name.includes('token') ? 'password' : 'text'}
-                          />
-                        )}
+                      <div key={ param.name } className="space-y-2">
+                        <Label htmlFor={ param.name }>{ param.description }</Label>
+                        <ActionParamInput 
+                          param={ param } 
+                          value={ actionParams[param.name] } 
+                          onChange={ handleParamChange }
+                        />
                       </div>
                     ))}
                   </div>
