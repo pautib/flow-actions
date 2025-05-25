@@ -22,10 +22,8 @@ export function encrypt(text) {
     // Symmetric cryptography -> One key only. Ex: AES
     // Asymmetric cryptography -> Public/Private key pair. Ex: RSA, EdDSA
     try {
-        // Generate a random IV Word Array
-        const iv = CryptoJS.lib.WordArray.random(16);
-        // Convert key to WordArray
-        const key = CryptoJS.enc.Utf8.parse(ENCRYPTION_KEY); // Ex: "abcd1234" → [0x61, 0x62, 0x63, 0x64, ...]
+        const iv = CryptoJS.lib.WordArray.random(16); // Generate a random IV Word Array
+        const key = CryptoJS.enc.Hex.parse(ENCRYPTION_KEY); // Convert key to WordArray. Ex: "abcd1234" → [0x61, 0x62, 0x63, 0x64, ...]
         // Encrypt the data. Input values:
             // Text: Data to encrypt
             // Key: 32 bytes secret
@@ -59,7 +57,7 @@ export function decrypt(encryptedObj) {
 
     try {
         // Convert key to WordArray
-        const key = CryptoJS.enc.Utf8.parse(ENCRYPTION_KEY);
+        const key = CryptoJS.enc.Hex.parse(ENCRYPTION_KEY);
         // Convert hex strings to WordArrays
         const iv = CryptoJS.enc.Hex.parse(encryptedObj.iv);
         const encryptedData = CryptoJS.enc.Hex.parse(encryptedObj.encryptedData);

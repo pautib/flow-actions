@@ -1,6 +1,6 @@
 const fs   = require("fs");
 const yaml = require("js-yaml");
-const { decrypt } = require("./utils/encryption");
+const { decrypt } = require("./utils/decryption");
 
 
 // Public methods
