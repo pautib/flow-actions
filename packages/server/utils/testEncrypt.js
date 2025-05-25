@@ -3,9 +3,9 @@ require('dotenv').config();
 
 const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY; // 32-char ASCII
 const text = process.argv[2];
-const iv = process.argv[3];
+const ivHex = process.argv[3];
 
-if (!text || !iv || !ENCRYPTION_KEY) {
+if (!text || !ivHex || !ENCRYPTION_KEY) {
     console.error('Missing input: text, iv, or ENCRYPTION_KEY');
     process.exit(1);
 }
@@ -13,13 +13,13 @@ if (!text || !iv || !ENCRYPTION_KEY) {
 console.log("Before encryption",
     {
         "text": text,
-        "iv": iv,
+        "ivHex": ivHex,
         "encryptionKey": ENCRYPTION_KEY
     }
 );
 
 const bufferedKey = Buffer.from(process.env.ENCRYPTION_KEY, 'hex');
-const bufferedIv = Buffer.from(iv, 'hex');
+const bufferedIv = Buffer.from(ivHex, 'hex');
 
 try {
     const cipher = crypto.createCipheriv(
@@ -28,11 +28,11 @@ try {
         bufferedIv
     );
 
-    encrypted = Buffer.concat([cipher.update(text, 'utf-8'), cipher.final()]);
+    const encrypted = Buffer.concat([cipher.update(text, 'utf8'), cipher.final()]);
     
     console.log("After encryption:",
         {
-            iv: iv.toString('hex'),
+            iv: ivHex.toString('hex'),
             encryptedData: encrypted.toString('hex')
         }
     );
