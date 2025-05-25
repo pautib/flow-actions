@@ -1,5 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 
 const DEFAULT_HTML = `
 <!DOCTYPE html>
@@ -39,13 +40,17 @@ const DEFAULT_HTML = `
 
 export const ActionParamInput = ({ param, value, onChange }) => {
 
+    const handleChange = (e) => {
+        onChange(param.name, e.target.value, param.encrypted);
+    };
+
     switch (param.type) {
         case "textarea":
             return (
                 <Textarea
                     id={ param.name }
                     value={ value || '' }
-                    onChange={ (e) => onChange(param.name, e.target.value) }
+                    onChange={ handleChange }
                     required={ param.required }
                     placeholder="Use {{variable}} for dynamic values"
                 />
@@ -56,7 +61,7 @@ export const ActionParamInput = ({ param, value, onChange }) => {
                 <Input
                     id={ param.name }
                     value={ value || '' }
-                    onChange={ (e) => onChange(param.name, e.target.value) }
+                    onChange={ handleChange }
                     required={ param.required }
                     type="text"
                 />
@@ -64,14 +69,41 @@ export const ActionParamInput = ({ param, value, onChange }) => {
         
         case "array":
             return (
-                <Input
-                    id={ param.name }
-                    value={ value || '' }
-                    onChange={ (e) => onChange(param.name, [...e.target.value.split(",").map(mail => mail.trim())]) }
-                    required={ param.required }
-                    placeholder="Introduce comma separated values"
-                    type="text"
-                />
+                <div className="space-y-2">
+                {Array.isArray(value) ? value.map((item, index) => (
+                    <div key={index} className="flex gap-2">
+                        <Input
+                            type="text"
+                            value={item}
+                            onChange={(e) => {
+                                const newValue = [...value];
+                                newValue[index] = e.target.value;
+                                onChange(param.name, newValue, param.encrypted);
+                            }}
+                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            placeholder={`Item ${index + 1}`}
+                        />
+                        <Button
+                            onClick={() => {
+                                const newValue = value.filter((_, i) => i !== index);
+                                onChange(param.name, newValue, param.encrypted);
+                            }}
+                            className="px-2 py-1 text-red-500 hover:text-red-700"
+                        >
+                            Remove
+                        </Button>
+                    </div>
+                )) : null}
+                    <Button
+                        onClick={() => {
+                            const newValue = [...(value || []), ''];
+                            onChange(param.name, newValue, param.encrypted);
+                        }}
+                        className="text-sm text-blue-500 hover:text-blue-700"
+                        >
+                        + Add Item
+                    </Button>
+                </div>
             );
 
         case "html":
@@ -79,7 +111,7 @@ export const ActionParamInput = ({ param, value, onChange }) => {
                 <Textarea
                     id={ param.name }
                     value={ value || DEFAULT_HTML}
-                    onChange={ (e) => onChange(param.name, e.target.value) }
+                    onChange={ handleChange }
                     required={ param.required }
                     placeholder="Use {{variable}} for dynamic values"
                 />
@@ -90,7 +122,7 @@ export const ActionParamInput = ({ param, value, onChange }) => {
                 <Input
                     id={ param.name }
                     value={ value || '' }
-                    onChange={ (e) => onChange(param.name, e.target.value) }
+                    onChange={ handleChange }
                     required={ param.required }
                     type="text"
                 />

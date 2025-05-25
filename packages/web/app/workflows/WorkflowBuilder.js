@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import YAML from 'yaml';
 import Image from 'next/image';
+import { decrypt, encrypt } from '../utils/encryption';
 import {
   Accordion,
   AccordionContent,
@@ -58,10 +59,24 @@ export default function WorkflowBuilder() {
     }
   };
 
-  const handleAddAction = () => {
+  const handleAddAction = async () => {
     if (selectedAction) {
+      const actionConfig = getActionConfig(selectedAction);
+      const processedParams = { ...actionParams };
+      // Encrypt sensitive values before adding the action
+      for (const param of actionConfig.parameters) {
+        if (param.encrypted && processedParams[param.name]) {
+          try {
+            const encrypted = await encrypt(processedParams[param.name]);
+            processedParams[param.name] = encrypted;
+          } catch (error) {
+            console.error('Error encrypting parameter:', error);
+          }
+        }
+      }
+
       const newAction = {
-        [selectedAction]: actionParams
+        [selectedAction]: processedParams
       };
       
       if (editingIndex !== null) {
@@ -83,8 +98,31 @@ export default function WorkflowBuilder() {
   const handleEditAction = (index) => {
     const action = workflowActions[index];
     const actionType = Object.keys(action)[0];
+    const actionConfig = getActionConfig(actionType);
+    const params = { ...action[actionType] };
+
+    console.log('Editing action:', {
+      actionType,
+      originalParams: params,
+      config: actionConfig
+    });
+
+    // Decrypt encrypted values
+    for (const param of actionConfig.parameters) {
+      if (param.encrypted && params[param.name]) {
+        console.log(`Attempting to decrypt parameter ${param.name}:`, params[param.name]);
+        const decrypted = decrypt(params[param.name]);
+        if (decrypted !== null) {
+          params[param.name] = decrypted;
+          console.log(`Successfully decrypted ${param.name}`);
+        } else {
+          console.log(`Failed to decrypt ${param.name}, keeping original value`);
+        }
+      }
+    }
+
     setSelectedAction(actionType);
-    setActionParams(action[actionType]);
+    setActionParams(params);
     setEditingIndex(index);
   };
 
@@ -98,18 +136,40 @@ export default function WorkflowBuilder() {
     setWorkflowActions(workflowActions.filter((_, i) => i !== index));
   };
 
-  const handleParamChange = (paramName, value) => {
+  const handleParamChange = async (paramName, value) => {
     setActionParams({
       ...actionParams,
       [paramName]: value
-    });
+    }); 
   };
 
   const handleSave = async () => {
     try {
+      // Process workflow actions to ensure all sensitive values are encrypted
+      const processedActions = await Promise.all(workflowActions.map(async (action) => {
+        const actionType = Object.keys(action)[0];
+        const actionConfig = getActionConfig(actionType);
+        const processedAction = { [actionType]: { ...action[actionType] } };
+
+        // Encrypt sensitive values if they're not already encrypted
+        for (const param of actionConfig.parameters) {
+          if (param.encrypted && processedAction[actionType][param.name]) {
+            const value = processedAction[actionType][param.name];
+            // Only encrypt if it's not already in encrypted format
+            if (!value.iv || !value.encryptedData) {
+              const encrypted = await encrypt(value);
+              if (encrypted) {
+                processedAction[actionType][param.name] = encrypted;
+              }
+            }
+          }
+        }
+        return processedAction;
+      }));
+
       const workflow = {
         [workflowName]: {
-          actions: workflowActions
+          actions: processedActions
         }
       };
       const yamlText = YAML.stringify(workflow);

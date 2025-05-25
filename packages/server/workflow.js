@@ -1,5 +1,6 @@
 const fs   = require("fs");
 const yaml = require("js-yaml");
+const { decrypt } = require("./utils/encryption");
 
 
 // Public methods
@@ -43,13 +44,20 @@ async function addWorkflow(req, res, next) {
 
   try {
     const workflow = yaml.load(req.body);
+    const workflowName = Object.keys(workflow)[0];
     
-    for (const action of workflow[Object.keys(workflow)[0]].actions) { // Validate each action
-      
-      const actionConfig = getActionsYaml().actions.find(a => a.name === Object.keys(action)[0]);
+    for (const action of workflow[workflowName].actions) { // Validate each action
+      const actionName = Object.keys(action)[0];
+      const actionConfig = getActionsYaml().actions.find(a => a.name === actionName);
+
+      if (!actionConfig) {
+        return res.status(400).json({
+          error: `Invalid action type: ${actionName}`
+        });
+      }
       
       for (const param of actionConfig.parameters) { // Validate required parameters
-        if (param.required && !action[Object.keys(action)[0]][param.name]) {
+        if (param.required && !action[actionName][param.name]) {
           return res.status(400).json({ 
             error: `Missing required parameter: ${param.name} for action ${action.type}` 
           });
@@ -79,7 +87,7 @@ function getActions(req, res, next) {
 function getWorkflows(req, res) {
   try {
     const workflows = getWorkflowsYaml();
-    res.json(workflows);
+    res.json(workflows ? workflows : {});
   } catch (error) {
     console.error('Error reading current workflows: ', error);
     res.status(500).json({error: 'Failed to load existing workflows'});
@@ -89,7 +97,28 @@ function getWorkflows(req, res) {
 function getActionObject(workflowName, actionName) {
   const actions = getWorkflow(workflowName).actions;
   const action = actions.find(action => Object.keys(action)[0] === actionName);
-  return action[Object.keys(action)[0]];
+  const actionConfig = getActionsYaml().actions.find(a => a.name === actionName);
+
+  if (!action || !actionConfig) {
+    return null;
+  }
+
+  const actionObj = action[Object.keys(action)[0]];
+  const result = { ...actionObj };
+
+  // Decrypt encrypted values
+  actionConfig.parameters.forEach(param => {
+    if (param.encrypted && actionObj[param.name]) {
+      const decrypted = decrypt(actionObj[param.name]);
+      if (decrypted === null) {
+        console.error(`Failed to decrypt ${param.name} for action ${actionName}`);
+        return;
+      }
+      result[param.name] = decrypted;
+    }
+  });
+
+  return result;
 }
 
 // Private methods
