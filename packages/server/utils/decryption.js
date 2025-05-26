@@ -11,7 +11,7 @@ function decrypt(encryptedObj) {
     try {
         const iv = Buffer.from(encryptedObj.iv, 'hex');
         const encryptedText = Buffer.from(encryptedObj.encryptedData, 'hex');
-        const decipher = crypto.createDecipheriv('aes-256-cbc', ENCRYPTION_KEY, iv); // Uses PKCS7 padding by default
+        const decipher = crypto.createDecipheriv('aes-256-cbc', ENCRYPTION_KEY, iv, { padding: 'pkcs7' });
         
         const decrypted = Buffer.concat([decipher.update(encryptedText), decipher.final()]);
         return decrypted.toString('utf8');
