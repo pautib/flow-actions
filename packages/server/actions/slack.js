@@ -25,6 +25,7 @@ module.exports = async function sendSlack(workflowName, requestBody) {
     });
 
     console.log("Slack message sent successfully: ", result);
+    return result;
 
   } catch (error) {
     console.error("An error occurred while sending the Slack message:", error);

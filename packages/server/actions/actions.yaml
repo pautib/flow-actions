@@ -73,3 +73,25 @@ actions:
         required: true
         encrypted: false
         description: "Email body html template, possibly with handlebars"
+
+  - name: "discord"
+    description: "Send a message to a Discord channel"
+    icon: "./icons/discord.png"
+    parameters:
+      - name: "channel_id"
+        type: "input"
+        required: true
+        encrypted: false
+        description: "Discord channel id to send the information to"
+      - name: "discord_token_id"
+        type: "input"
+        required: true
+        encrypted: true
+        description: "Token associated to the Bot you created"
+      - name: "message"
+        type: "textarea"
+        required: true
+        encrypted: false
+        description: "Message to send with placeholders for variables"
+
+

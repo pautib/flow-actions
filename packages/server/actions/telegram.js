@@ -27,6 +27,8 @@ module.exports = async function sendTelegram(flow, user) {
         }
         
         console.log(`Message sent successfully to ${user.name}`);
+
+        return result;
         
     } catch (error) {
         console.error(`Error sending Telegram message: ${error}`);
