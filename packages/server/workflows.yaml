@@ -1,0 +1,24 @@
+register:
+  actions:
+    - slack:
+        message: Hello!
+        slack_token_id:
+          iv: 4ece63bf725af9946d5e24ffce66f2a6
+          encryptedData: 3af6facbffc5e91040cb08ac8750ece0
+        slack_channel: C08P135BC3V
+notify:
+  actions:
+    - slack:
+        message: test
+        slack_token_id:
+          iv: c20b694414e439111f2832294e47110f
+          encryptedData: 7fcaf18fed19f924e69457f45ed4531e
+        slack_channel: test
+test:
+  actions:
+    - slack:
+        message: test
+        slack_token_id:
+          iv: 47ea1819d44ffc133dfd9a14e16d4163
+          encryptedData: 76f237eef56e1ce3c005f09eed6022f5
+        slack_channel: test

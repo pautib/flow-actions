@@ -1,6 +1,7 @@
 const fs   = require("fs");
 const yaml = require("js-yaml");
 const { decrypt } = require("./utils/decryption");
+const WorkflowLogger = require('./utils/logger');
 
 
 // Public methods
@@ -8,15 +9,21 @@ async function executeWorkflow(req, res, next) {
   
   const { workflowName } = req.params;
   const requestBody = req.body;
+  const logger = new WorkflowLogger(workflowName);
+
   console.log(`Executing workflow: ${workflowName}`);
   
   const workflows = getWorkflowsYaml();
 
   const workflow = workflows[workflowName];
   if (!workflow || !workflow.actions) {
-    console.log(`No workflow found for event: ${workflowName}`);
-    return res.status(400).json({ "message": `No workflow found for event: ${workflowName}` });
+    const error = `No workflow found for event: ${workflowName}`;
+    logger.logError(new Error(error));
+    return res.status(400).json({ "message": error });
   }
+
+  const executionResults = [];
+  let hasError = false;
 
   for (const actionItem of workflow.actions) {
 
@@ -30,14 +37,46 @@ async function executeWorkflow(req, res, next) {
 
     try {
       const action = require(`./actions/${actionName}`);
-      await action(workflowName, requestBody);
-      next();
-    } catch (err) {
-      console.error(`Error in action '${actionName}':`, err.message);
-      return res.status(400).json({ message: `Error executing action ${ actionName } in workflow ${ workflowName } `});
+      const result = await action(workflowName, requestBody);
+      
+      executionResults.push({
+        action: actionName,
+        status: 'success',
+        result
+      });
+
+    } catch (error) {
+      hasError = true;
+      
+      executionResults.push({
+        action: actionName,
+        status: 'error',
+        error: error.message
+      });
+
+      logger.logError(error, {
+        action: actionName,
+        requestBody: requestBody,
+        executionResults: executionResults
+      });
+
+      return res.status(400).json({
+        message: `Error executing action ${ actionName } in workflow ${ workflowName }`,
+        details: error.message,
+      });
+
     }
 
   }
+
+  if (!hasError) {
+    logger.logSuccess({
+      requestBody,
+      executionResults
+    });
+  }
+
+  next();
 }
 
 async function addWorkflow(req, res, next) {

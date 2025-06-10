@@ -15,7 +15,7 @@ module.exports = async function sendSlack(workflowName, requestBody) {
   if (slackObj.message) {
     slackObj.message = slackObj.message.replace(/\{\{(\w+)\}\}/g, (match, key) => {
       return requestBody[key] || match;
-    });
+    }); 
   }
 
   try {
@@ -28,7 +28,7 @@ module.exports = async function sendSlack(workflowName, requestBody) {
 
   } catch (error) {
     console.error("An error occurred while sending the Slack message:", error);
-    return;
+    throw new Error(error);
   }
 
 };

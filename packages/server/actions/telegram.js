@@ -30,6 +30,6 @@ module.exports = async function sendTelegram(flow, user) {
         
     } catch (error) {
         console.error(`Error sending Telegram message: ${error}`);
-        return;
+        throw new Error(error);
     }
 }
