@@ -45,7 +45,7 @@ pnpm dev
 
 2. Access the applications:
 - Frontend: http://localhost:3000
-- Backend: http://localhost:4000
+- Backend: http://localhost:3001
 
 ## Building for Production
 
