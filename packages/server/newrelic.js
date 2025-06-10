@@ -9,18 +9,22 @@ exports.config = {
   /**
    * Array of application names.
    */
-  app_name: ['flow-actions'],
+  app_name: [process.env.NEW_RELIC_APP_NAME || 'flow-actions'],
   /**
    * Your New Relic license key.
    */
-  license_key: 'eu01xx9be4af2678de581d6b426a3642FFFFNRAL',
+  license_key: process.env.NEW_RELIC_LICENSE_KEY,
+  /**
+   * This setting represents the name of the current environment
+   */
+  environment: process.env.NEW_RELIC_NODE_ENV || 'development',
   logging: {
     /**
      * Level at which to log. 'trace' is most useful to New Relic when diagnosing
      * issues with the agent, 'info' and higher will impose the least overhead on
      * production applications.
      */
-    level: 'info'
+    level: process.env.NEW_RELIC_LOG_LEVEL || 'info'
   },
   /**
    * When true, all request headers except for those listed in attributes.exclude
@@ -49,5 +53,9 @@ exports.config = {
       'response.headers.setCookie*',
       'response.headers.x*'
     ]
-  }
+  },
+  /**
+   * Setting to enable/disable the agent
+   */
+  agent_enabled: process.env.NEW_RELIC_ENABLED === 'true'
 }
